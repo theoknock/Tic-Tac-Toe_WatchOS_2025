@@ -117,6 +117,7 @@ struct GameHistory: Identifiable {
     override init() {
         super.init()
         resetGame()
+        gameOver = true
     }
 
     func resetGame() {
