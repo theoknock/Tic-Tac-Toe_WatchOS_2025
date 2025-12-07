@@ -11,6 +11,7 @@ import Combine
 
 struct ContentView: View {
     @State private var game = TicTacToeGame()
+    @State private var celebrationScale: CGFloat = 1.0
 
     var body: some View {
         VStack(spacing: 6) {
@@ -20,10 +21,24 @@ struct ContentView: View {
                 .font(.headline)
                 .foregroundColor(game.winner?.color ?? .white)
                 .padding(.bottom, 2)
+                .scaleEffect(celebrationScale)
+                .animation(.spring(response: 0.3, dampingFraction: 0.5), value: celebrationScale)
+                .onChange(of: game.gameOver) { _, isOver in
+                    if isOver {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+                            celebrationScale = 1.2
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+                                celebrationScale = 1.0
+                            }
+                        }
+                    }
+                }
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 6) {
                 ForEach(game.cells) { cell in
-                    CellView(player: cell.player)
+                    CellView(player: cell.player, isWinningCell: game.isWinningCell(cell.id))
                         .onTapGesture {
                             game.makeMove(at: cell.id)
                         }
@@ -33,10 +48,12 @@ struct ContentView: View {
 
             if game.gameOver {
                 Button("New Game") {
+                    celebrationScale = 1.0
                     game.resetGame()
                 }
                 .buttonStyle(.borderedProminent)
                 .padding(.top, 4)
+                .transition(.scale.combined(with: .opacity))
             }
 
             if game.playerWins + game.watchWins + game.draws > 0 {
@@ -45,9 +62,11 @@ struct ContentView: View {
                 }
                 .font(.caption)
                 .foregroundColor(.secondary)
+                .transition(.opacity)
             }
         }
         .padding(.vertical, 4)
+        .animation(.easeInOut(duration: 0.3), value: game.gameOver)
     }
 }
 
@@ -94,17 +113,39 @@ struct ScoreView: View {
 
 struct CellView: View {
     let player: Player?
+    let isWinningCell: Bool
+    @State private var appeared = false
 
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 8)
                 .fill(Color.gray.opacity(0.3))
                 .aspectRatio(1, contentMode: .fit)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(isWinningCell ? Color.yellow : Color.clear, lineWidth: 3)
+                        .opacity(isWinningCell ? 1 : 0)
+                        .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true), value: isWinningCell)
+                )
 
             if let player = player {
                 Text(player.rawValue)
                     .font(.system(size: 28, weight: .bold))
                     .foregroundColor(player.color)
+                    .scaleEffect(appeared ? 1.0 : 0.1)
+                    .opacity(appeared ? 1.0 : 0.0)
+                    .rotationEffect(.degrees(appeared ? 0 : 180))
+                    .onAppear {
+                        withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
+                            appeared = true
+                        }
+                    }
+                    .onChange(of: player) { _, _ in
+                        appeared = false
+                        withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
+                            appeared = true
+                        }
+                    }
             }
         }
     }

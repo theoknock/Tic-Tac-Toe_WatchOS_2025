@@ -37,6 +37,7 @@ struct GameCell: Identifiable {
     var gameOver: Bool = false
     var winner: Player?
     var isDraw: Bool = false
+    var winningPattern: [Int] = []
 
     var playerWins: Int = 0
     var watchWins: Int = 0
@@ -57,6 +58,7 @@ struct GameCell: Identifiable {
         gameOver = false
         winner = nil
         isDraw = false
+        winningPattern = []
     }
 
     func resetScores() {
@@ -169,9 +171,17 @@ struct GameCell: Identifiable {
             [0, 4, 8], [2, 4, 6]              // Diagonals
         ]
 
-        return winPatterns.contains { pattern in
-            pattern.allSatisfy { cells[$0].player == player }
+        for pattern in winPatterns {
+            if pattern.allSatisfy({ cells[$0].player == player }) {
+                winningPattern = pattern
+                return true
+            }
         }
+        return false
+    }
+
+    func isWinningCell(_ index: Int) -> Bool {
+        return winningPattern.contains(index)
     }
 
     var statusMessage: String {
