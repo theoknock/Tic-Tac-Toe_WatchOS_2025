@@ -92,12 +92,10 @@ struct ButtonMenuView: View {
                 .padding(.vertical, .small)
 
             HStack(spacing: .medium) {
-                if game.totalGames > 0 {
-                    NavigationLink(destination: StatisticsView(game: game)) {
-                        Label("Stats", systemImage: "chart.bar.fill")
-                    }
-                    .font(.caption)
+                NavigationLink(destination: StatisticsView(game: game)) {
+                    Label("Stats", systemImage: "chart.bar.fill")
                 }
+                .font(.caption)
 
                 NavigationLink(destination: AlgorithmPickerView(game: game)) {
                     Label("AI", systemImage: "cpu")

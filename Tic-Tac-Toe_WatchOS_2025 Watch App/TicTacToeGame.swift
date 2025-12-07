@@ -120,10 +120,6 @@ struct GameHistory: Identifiable {
     }
 
     func resetGame() {
-        if gameOver {
-            updateScores()
-        }
-
         cells = (0..<9).map { GameCell(id: $0, player: nil) }
         currentPlayer = .x
         gameOver = false
@@ -179,10 +175,12 @@ struct GameHistory: Identifiable {
         if checkWin(for: .x) {
             winner = .x
             gameOver = true
+            updateScores()
             playHaptic(.success)
         } else if cells.allSatisfy({ $0.player != nil }) {
             isDraw = true
             gameOver = true
+            updateScores()
             playHaptic(.notification)
         } else {
             currentPlayer = .o
@@ -216,10 +214,12 @@ struct GameHistory: Identifiable {
             if checkWin(for: .o) {
                 winner = .o
                 gameOver = true
+                updateScores()
                 playHaptic(.failure)
             } else if cells.allSatisfy({ $0.player != nil }) {
                 isDraw = true
                 gameOver = true
+                updateScores()
                 playHaptic(.notification)
             } else {
                 currentPlayer = .x
