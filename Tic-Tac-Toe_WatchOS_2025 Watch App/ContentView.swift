@@ -16,13 +16,13 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 6) {
+            VStack(spacing: .small) {
             ScoreView(playerWins: game.playerWins, watchWins: game.watchWins, draws: game.draws, theme: game.currentTheme)
 
             Text(game.statusMessage)
                 .font(.headline)
                 .foregroundColor(game.winner?.color(for: game.currentTheme) ?? .white)
-                .padding(.bottom, 2)
+                .padding(.bottom, .xxSmall)
                 .scaleEffect(celebrationScale)
                 .animation(.spring(response: 0.3, dampingFraction: 0.5), value: celebrationScale)
                 .onChange(of: game.gameOver) { _, isOver in
@@ -38,7 +38,7 @@ struct ContentView: View {
                     }
                 }
 
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 6) {
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: .small) {
                 ForEach(game.cells) { cell in
                     CellView(player: cell.player, isWinningCell: game.isWinningCell(cell.id), theme: game.currentTheme)
                         .onTapGesture {
@@ -46,7 +46,7 @@ struct ContentView: View {
                         }
                 }
             }
-            .padding(.horizontal, 8)
+            .padding(.horizontal, .medium)
             .id(game.gameID)
             .background(game.currentTheme.boardBackground)
 
@@ -56,11 +56,11 @@ struct ContentView: View {
                     game.resetGame()
                 }
                 .buttonStyle(.borderedProminent)
-                .padding(.top, 4)
+                .padding(.top, .small)
                 .transition(.scale.combined(with: .opacity))
             }
 
-            HStack(spacing: 8) {
+            HStack(spacing: .medium) {
                 if game.totalGames > 0 {
                     NavigationLink(destination: StatisticsView(game: game)) {
                         Label("Stats", systemImage: "chart.bar.fill")
@@ -78,7 +78,7 @@ struct ContentView: View {
                 }
                 .font(.caption)
             }
-            .padding(.top, 2)
+            .padding(.top, .xxSmall)
 
             if game.playerWins + game.watchWins + game.draws > 0 {
                 Button("Reset Scores") {
@@ -89,7 +89,7 @@ struct ContentView: View {
                 .transition(.opacity)
             }
             }
-            .padding(.vertical, 4)
+            .padding(.vertical, .small)
             .animation(.easeInOut(duration: 0.3), value: game.gameOver)
         }
     }
@@ -102,8 +102,8 @@ struct ScoreView: View {
     let theme: GameTheme
 
     var body: some View {
-        HStack(spacing: 12) {
-            VStack(spacing: 2) {
+        HStack(spacing: .large) {
+            VStack(spacing: .xxSmall) {
                 Text("You")
                     .font(.caption2)
                     .foregroundColor(.secondary)
@@ -113,7 +113,7 @@ struct ScoreView: View {
                     .foregroundColor(theme.playerXColor)
             }
 
-            VStack(spacing: 2) {
+            VStack(spacing: .xxSmall) {
                 Text("Draws")
                     .font(.caption2)
                     .foregroundColor(.secondary)
@@ -123,7 +123,7 @@ struct ScoreView: View {
                     .foregroundColor(.gray)
             }
 
-            VStack(spacing: 2) {
+            VStack(spacing: .xxSmall) {
                 Text("Watch")
                     .font(.caption2)
                     .foregroundColor(.secondary)
@@ -133,7 +133,7 @@ struct ScoreView: View {
                     .foregroundColor(theme.playerOColor)
             }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, .small)
     }
 }
 
@@ -145,19 +145,19 @@ struct CellView: View {
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: .cornerRadiusMedium)
                 .fill(theme.cellBackground)
                 .aspectRatio(1, contentMode: .fit)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(isWinningCell ? theme.winningLineColor : Color.clear, lineWidth: 3)
+                    RoundedRectangle(cornerRadius: .cornerRadiusMedium)
+                        .stroke(isWinningCell ? theme.winningLineColor : Color.clear, lineWidth: .borderWidthMedium)
                         .opacity(isWinningCell ? 1 : 0)
                         .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true), value: isWinningCell)
                 )
 
             if let player = player {
                 Text(player.rawValue)
-                    .font(.system(size: 28, weight: .bold))
+                    .font(.system(size: .fontSizeLarge, weight: .bold))
                     .foregroundColor(player.color(for: theme))
                     .scaleEffect(appeared ? 1.0 : 0.1)
                     .opacity(appeared ? 1.0 : 0.0)
@@ -183,11 +183,11 @@ struct ThemePickerView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 12) {
+            VStack(spacing: .large) {
                 Text("Choose Theme")
                     .font(.title3)
                     .fontWeight(.bold)
-                    .padding(.bottom, 4)
+                    .padding(.bottom, .small)
 
                 ForEach(GameTheme.allThemes) { theme in
                     ThemePreviewButton(theme: theme, isSelected: game.currentTheme.id == theme.id) {
@@ -209,35 +209,35 @@ struct ThemePreviewButton: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 8) {
-                HStack(spacing: 4) {
+            VStack(spacing: .medium) {
+                HStack(spacing: .small) {
                     Text("X")
                         .font(.title3)
                         .fontWeight(.bold)
                         .foregroundColor(theme.playerXColor)
-                        .frame(width: 30, height: 30)
+                        .frame(width: .previewCellSize, height: .previewCellSize)
                         .background(theme.cellBackground)
-                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                        .clipShape(RoundedRectangle(cornerRadius: .cornerRadiusSmall))
 
                     Text("O")
                         .font(.title3)
                         .fontWeight(.bold)
                         .foregroundColor(theme.playerOColor)
-                        .frame(width: 30, height: 30)
+                        .frame(width: .previewCellSize, height: .previewCellSize)
                         .background(theme.cellBackground)
-                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                        .clipShape(RoundedRectangle(cornerRadius: .cornerRadiusSmall))
                 }
-                .padding(8)
+                .padding(.medium)
                 .background(theme.boardBackground)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .clipShape(RoundedRectangle(cornerRadius: .cornerRadiusMedium))
 
                 Text(theme.name)
                     .font(.caption)
                     .fontWeight(isSelected ? .bold : .regular)
             }
             .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(isSelected ? Color.white : Color.clear, lineWidth: 2)
+                RoundedRectangle(cornerRadius: .cornerRadiusLarge)
+                    .stroke(isSelected ? Color.white : Color.clear, lineWidth: .borderWidthThin)
             )
         }
         .buttonStyle(.plain)
@@ -249,12 +249,12 @@ struct StatisticsView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 12) {
+            VStack(spacing: .large) {
                 Text("Statistics")
                     .font(.title3)
                     .fontWeight(.bold)
 
-                VStack(spacing: 8) {
+                VStack(spacing: .medium) {
                     StatRow(label: "Total Games", value: "\(game.totalGames)")
                     StatRow(label: "Win Rate", value: String(format: "%.1f%%", game.winPercentage))
                     StatRow(label: "Current Streak", value: "\(game.currentStreak)")
@@ -264,11 +264,11 @@ struct StatisticsView: View {
 
                 if !game.gameHistory.isEmpty {
                     Divider()
-                        .padding(.vertical, 4)
+                        .padding(.vertical, .small)
 
                     Text("By Algorithm")
                         .font(.headline)
-                        .padding(.bottom, 4)
+                        .padding(.bottom, .small)
 
                     ForEach(AIAlgorithm.allCases) { algorithm in
                         let stats = game.algorithmStats(for: algorithm)
@@ -278,11 +278,11 @@ struct StatisticsView: View {
                     }
 
                     Divider()
-                        .padding(.vertical, 4)
+                        .padding(.vertical, .small)
 
                     Text("Recent Games")
                         .font(.headline)
-                        .padding(.bottom, 4)
+                        .padding(.bottom, .small)
 
                     ForEach(game.gameHistory.prefix(10)) { history in
                         GameHistoryRow(history: history, theme: game.currentTheme)
@@ -299,7 +299,7 @@ struct AlgorithmStatRow: View {
     let stats: (wins: Int, losses: Int, draws: Int, winRate: Double)
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: .small) {
             HStack {
                 Text(algorithm.rawValue)
                     .font(.caption)
@@ -310,7 +310,7 @@ struct AlgorithmStatRow: View {
                     .foregroundColor(.secondary)
             }
 
-            HStack(spacing: 4) {
+            HStack(spacing: .small) {
                 Text("W:\(stats.wins)")
                     .font(.caption2)
                     .foregroundColor(.green)
@@ -322,7 +322,7 @@ struct AlgorithmStatRow: View {
                     .foregroundColor(.gray)
             }
         }
-        .padding(.vertical, 2)
+        .padding(.vertical, .xxSmall)
     }
 }
 
@@ -349,7 +349,7 @@ struct GameHistoryRow: View {
 
     var body: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: .xxSmall) {
                 Text(history.resultText)
                     .font(.caption)
                     .fontWeight(.medium)
@@ -363,7 +363,7 @@ struct GameHistoryRow: View {
                 .font(.caption2)
                 .foregroundColor(.secondary)
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, .small)
     }
 
     private func formatDate(_ date: Date) -> String {
@@ -378,11 +378,11 @@ struct AlgorithmPickerView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 12) {
+            VStack(spacing: .large) {
                 Text("AI Algorithm")
                     .font(.title3)
                     .fontWeight(.bold)
-                    .padding(.bottom, 4)
+                    .padding(.bottom, .small)
 
                 ForEach(AIAlgorithm.allCases) { algorithm in
                     AlgorithmButton(
@@ -397,7 +397,7 @@ struct AlgorithmPickerView: View {
 
                 if game.selectedAlgorithm == .mctsProbabilistic {
                     Divider()
-                        .padding(.vertical, 4)
+                        .padding(.vertical, .small)
 
                     OpponentModelView(beliefs: game.opponentBeliefs)
                 }
@@ -414,7 +414,7 @@ struct AlgorithmButton: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: .small) {
                 Text(algorithm.strategy.name)
                     .font(.headline)
                     .fontWeight(isSelected ? .bold : .semibold)
@@ -432,12 +432,12 @@ struct AlgorithmButton: View {
                     .multilineTextAlignment(.leading)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(8)
+            .padding(.medium)
             .background(isSelected ? Color.blue.opacity(0.3) : Color.gray.opacity(0.2))
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .clipShape(RoundedRectangle(cornerRadius: .cornerRadiusMedium))
             .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 2)
+                RoundedRectangle(cornerRadius: .cornerRadiusMedium)
+                    .stroke(isSelected ? Color.blue : Color.clear, lineWidth: .borderWidthThin)
             )
         }
         .buttonStyle(.plain)
@@ -448,7 +448,7 @@ struct OpponentModelView: View {
     let beliefs: [OpponentStrategy: Double]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: .medium) {
             Text("Opponent Model")
                 .font(.headline)
                 .fontWeight(.bold)
@@ -458,7 +458,7 @@ struct OpponentModelView: View {
                 .foregroundColor(.secondary)
 
             ForEach(OpponentStrategy.allCases, id: \.self) { strategy in
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: .xxSmall) {
                     HStack {
                         Text(strategy.rawValue)
                             .font(.caption)
@@ -471,22 +471,22 @@ struct OpponentModelView: View {
 
                     GeometryReader { geometry in
                         ZStack(alignment: .leading) {
-                            RoundedRectangle(cornerRadius: 2)
+                            RoundedRectangle(cornerRadius: .xxxSmall)
                                 .fill(Color.gray.opacity(0.3))
-                                .frame(height: 4)
+                                .frame(height: .small)
 
-                            RoundedRectangle(cornerRadius: 2)
+                            RoundedRectangle(cornerRadius: .xxxSmall)
                                 .fill(strategyColor(strategy))
-                                .frame(width: geometry.size.width * CGFloat(beliefs[strategy] ?? 0), height: 4)
+                                .frame(width: geometry.size.width * CGFloat(beliefs[strategy] ?? 0), height: .small)
                         }
                     }
-                    .frame(height: 4)
+                    .frame(height: .small)
                 }
             }
         }
-        .padding(8)
+        .padding(.medium)
         .background(Color.gray.opacity(0.2))
-        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .clipShape(RoundedRectangle(cornerRadius: .cornerRadiusMedium))
     }
 
     private func strategyColor(_ strategy: OpponentStrategy) -> Color {
