@@ -37,17 +37,43 @@ struct GameCell: Identifiable {
     var winner: Player?
     var isDraw: Bool = false
 
+    var playerWins: Int = 0
+    var watchWins: Int = 0
+    var draws: Int = 0
+
     override init() {
         super.init()
         resetGame()
     }
 
     func resetGame() {
+        if gameOver {
+            updateScores()
+        }
+
         cells = (0..<9).map { GameCell(id: $0, player: nil) }
         currentPlayer = .x
         gameOver = false
         winner = nil
         isDraw = false
+    }
+
+    func resetScores() {
+        playerWins = 0
+        watchWins = 0
+        draws = 0
+    }
+
+    private func updateScores() {
+        if let winner = winner {
+            if winner == .x {
+                playerWins += 1
+            } else {
+                watchWins += 1
+            }
+        } else if isDraw {
+            draws += 1
+        }
     }
 
     func makeMove(at index: Int) {
