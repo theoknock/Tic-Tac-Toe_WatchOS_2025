@@ -16,7 +16,24 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: .small) {
+            if game.gameOver {
+                ButtonMenuView(game: game, celebrationScale: $celebrationScale)
+                    .transition(.opacity)
+            } else {
+                BoardView(game: game, celebrationScale: $celebrationScale)
+                    .transition(.opacity)
+            }
+        }
+        .animation(.easeInOut(duration: 0.3), value: game.gameOver)
+    }
+}
+
+struct BoardView: View {
+    let game: TicTacToeGame
+    @Binding var celebrationScale: CGFloat
+
+    var body: some View {
+        VStack(spacing: .small) {
             ScoreView(playerWins: game.playerWins, watchWins: game.watchWins, draws: game.draws, theme: game.currentTheme)
 
             Text(game.statusMessage)
@@ -49,16 +66,32 @@ struct ContentView: View {
             .padding(.horizontal, .medium)
             .id(game.gameID)
             .background(game.currentTheme.boardBackground)
+        }
+        .padding(.vertical, .small)
+    }
+}
 
-            if game.gameOver {
-                Button("New Game") {
-                    celebrationScale = 1.0
-                    game.resetGame()
-                }
-                .buttonStyle(.borderedProminent)
-                .padding(.top, .small)
-                .transition(.scale.combined(with: .opacity))
+struct ButtonMenuView: View {
+    let game: TicTacToeGame
+    @Binding var celebrationScale: CGFloat
+
+    var body: some View {
+        VStack(spacing: .large) {
+            Spacer()
+
+            Text(game.statusMessage)
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundColor(game.winner?.color(for: game.currentTheme) ?? .white)
+
+            Button("New Game") {
+                celebrationScale = 1.0
+                game.resetGame()
             }
+            .buttonStyle(.borderedProminent)
+
+            Divider()
+                .padding(.vertical, .small)
 
             HStack(spacing: .medium) {
                 if game.totalGames > 0 {
@@ -78,7 +111,6 @@ struct ContentView: View {
                 }
                 .font(.caption)
             }
-            .padding(.top, .xxSmall)
 
             if game.playerWins + game.watchWins + game.draws > 0 {
                 Button("Reset Scores") {
@@ -86,12 +118,11 @@ struct ContentView: View {
                 }
                 .font(.caption)
                 .foregroundColor(.secondary)
-                .transition(.opacity)
             }
-            }
-            .padding(.vertical, .small)
-            .animation(.easeInOut(duration: 0.3), value: game.gameOver)
+
+            Spacer()
         }
+        .padding()
     }
 }
 
