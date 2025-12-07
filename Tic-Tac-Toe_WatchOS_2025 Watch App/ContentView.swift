@@ -34,8 +34,6 @@ struct BoardView: View {
 
     var body: some View {
         VStack(spacing: .small) {
-            ScoreView(playerWins: game.playerWins, watchWins: game.watchWins, draws: game.draws, theme: game.currentTheme)
-
             Text(game.statusMessage)
                 .font(.headline)
                 .foregroundColor(game.winner?.color(for: game.currentTheme) ?? .white)
@@ -284,6 +282,9 @@ struct StatisticsView: View {
                 Text("Statistics")
                     .font(.title3)
                     .fontWeight(.bold)
+
+                ScoreView(playerWins: game.playerWins, watchWins: game.watchWins, draws: game.draws, theme: game.currentTheme)
+                    .padding(.bottom, .small)
 
                 VStack(spacing: .medium) {
                     StatRow(label: "Total Games", value: "\(game.totalGames)")
