@@ -45,6 +45,7 @@ struct ContentView: View {
                 }
             }
             .padding(.horizontal, 8)
+            .id(game.gameID)
 
             if game.gameOver {
                 Button("New Game") {

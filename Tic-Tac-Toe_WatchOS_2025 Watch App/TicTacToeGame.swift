@@ -38,6 +38,7 @@ struct GameCell: Identifiable {
     var winner: Player?
     var isDraw: Bool = false
     var winningPattern: [Int] = []
+    var gameID: UUID = UUID()
 
     var playerWins: Int = 0
     var watchWins: Int = 0
@@ -59,6 +60,7 @@ struct GameCell: Identifiable {
         winner = nil
         isDraw = false
         winningPattern = []
+        gameID = UUID()
     }
 
     func resetScores() {
