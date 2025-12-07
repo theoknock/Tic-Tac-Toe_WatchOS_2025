@@ -14,10 +14,10 @@ enum Player: String {
     case x = "X"
     case o = "O"
 
-    var color: Color {
+    func color(for theme: GameTheme) -> Color {
         switch self {
-        case .x: return .blue
-        case .o: return .red
+        case .x: return theme.playerXColor
+        case .o: return theme.playerOColor
         }
     }
 
@@ -67,6 +67,8 @@ struct GameHistory: Identifiable {
     var draws: Int = 0
 
     var gameHistory: [GameHistory] = []
+
+    var currentTheme: GameTheme = .classic
 
     override init() {
         super.init()
