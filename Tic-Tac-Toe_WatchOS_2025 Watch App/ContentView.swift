@@ -93,19 +93,19 @@ struct ButtonMenuView: View {
 
             HStack(spacing: .medium) {
                 NavigationLink(destination: StatisticsView(game: game)) {
-                    Label("Stats", systemImage: "chart.bar.fill")
+                    Image(systemName: "chart.bar.fill")
+                        .font(.title3)
                 }
-                .font(.caption)
 
                 NavigationLink(destination: AlgorithmPickerView(game: game)) {
-                    Label("AI", systemImage: "cpu")
+                    Image(systemName: "cpu")
+                        .font(.title3)
                 }
-                .font(.caption)
 
                 NavigationLink(destination: ThemePickerView(game: game)) {
-                    Label("Theme", systemImage: "paintpalette.fill")
+                    Image(systemName: "paintpalette.fill")
+                        .font(.title3)
                 }
-                .font(.caption)
             }
 
             if game.playerWins + game.watchWins + game.draws > 0 {
