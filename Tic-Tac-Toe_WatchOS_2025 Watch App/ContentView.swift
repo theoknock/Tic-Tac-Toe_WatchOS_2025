@@ -68,6 +68,11 @@ struct ContentView: View {
                     .font(.caption)
                 }
 
+                NavigationLink(destination: AlgorithmPickerView(game: game)) {
+                    Label("AI", systemImage: "cpu")
+                }
+                .font(.caption)
+
                 NavigationLink(destination: ThemePickerView(game: game)) {
                     Label("Theme", systemImage: "paintpalette.fill")
                 }
@@ -261,6 +266,20 @@ struct StatisticsView: View {
                     Divider()
                         .padding(.vertical, 4)
 
+                    Text("By Algorithm")
+                        .font(.headline)
+                        .padding(.bottom, 4)
+
+                    ForEach(AIAlgorithm.allCases) { algorithm in
+                        let stats = game.algorithmStats(for: algorithm)
+                        if stats.wins + stats.losses + stats.draws > 0 {
+                            AlgorithmStatRow(algorithm: algorithm, stats: stats)
+                        }
+                    }
+
+                    Divider()
+                        .padding(.vertical, 4)
+
                     Text("Recent Games")
                         .font(.headline)
                         .padding(.bottom, 4)
@@ -272,6 +291,38 @@ struct StatisticsView: View {
             }
             .padding()
         }
+    }
+}
+
+struct AlgorithmStatRow: View {
+    let algorithm: AIAlgorithm
+    let stats: (wins: Int, losses: Int, draws: Int, winRate: Double)
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(algorithm.rawValue)
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                Spacer()
+                Text(String(format: "%.0f%%", stats.winRate))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            HStack(spacing: 4) {
+                Text("W:\(stats.wins)")
+                    .font(.caption2)
+                    .foregroundColor(.green)
+                Text("L:\(stats.losses)")
+                    .font(.caption2)
+                    .foregroundColor(.red)
+                Text("D:\(stats.draws)")
+                    .font(.caption2)
+                    .foregroundColor(.gray)
+            }
+        }
+        .padding(.vertical, 2)
     }
 }
 
@@ -303,7 +354,7 @@ struct GameHistoryRow: View {
                     .font(.caption)
                     .fontWeight(.medium)
                     .foregroundColor(history.result == .playerWin ? theme.playerXColor : (history.result == .watchWin ? theme.playerOColor : .gray))
-                Text("\(history.moveCount) moves")
+                Text("\(history.moveCount) moves • \(history.algorithm.rawValue)")
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
@@ -319,6 +370,136 @@ struct GameHistoryRow: View {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
         return formatter.string(from: date)
+    }
+}
+
+struct AlgorithmPickerView: View {
+    let game: TicTacToeGame
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 12) {
+                Text("AI Algorithm")
+                    .font(.title3)
+                    .fontWeight(.bold)
+                    .padding(.bottom, 4)
+
+                ForEach(AIAlgorithm.allCases) { algorithm in
+                    AlgorithmButton(
+                        algorithm: algorithm,
+                        isSelected: game.selectedAlgorithm == algorithm
+                    ) {
+                        withAnimation {
+                            game.selectedAlgorithm = algorithm
+                        }
+                    }
+                }
+
+                if game.selectedAlgorithm == .mctsProbabilistic {
+                    Divider()
+                        .padding(.vertical, 4)
+
+                    OpponentModelView(beliefs: game.opponentBeliefs)
+                }
+            }
+            .padding()
+        }
+    }
+}
+
+struct AlgorithmButton: View {
+    let algorithm: AIAlgorithm
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(algorithm.strategy.name)
+                    .font(.headline)
+                    .fontWeight(isSelected ? .bold : .semibold)
+                    .foregroundColor(isSelected ? .white : .primary)
+
+                Text(algorithm.strategy.description)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.leading)
+
+                Text(algorithm.strategy.historicalContext)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .italic()
+                    .multilineTextAlignment(.leading)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(8)
+            .background(isSelected ? Color.blue.opacity(0.3) : Color.gray.opacity(0.2))
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 2)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+struct OpponentModelView: View {
+    let beliefs: [OpponentStrategy: Double]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Opponent Model")
+                .font(.headline)
+                .fontWeight(.bold)
+
+            Text("AI's belief distribution about your playing style")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+
+            ForEach(OpponentStrategy.allCases, id: \.self) { strategy in
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack {
+                        Text(strategy.rawValue)
+                            .font(.caption)
+                            .foregroundColor(.primary)
+                        Spacer()
+                        Text(String(format: "%.0f%%", (beliefs[strategy] ?? 0) * 100))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+
+                    GeometryReader { geometry in
+                        ZStack(alignment: .leading) {
+                            RoundedRectangle(cornerRadius: 2)
+                                .fill(Color.gray.opacity(0.3))
+                                .frame(height: 4)
+
+                            RoundedRectangle(cornerRadius: 2)
+                                .fill(strategyColor(strategy))
+                                .frame(width: geometry.size.width * CGFloat(beliefs[strategy] ?? 0), height: 4)
+                        }
+                    }
+                    .frame(height: 4)
+                }
+            }
+        }
+        .padding(8)
+        .background(Color.gray.opacity(0.2))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+
+    private func strategyColor(_ strategy: OpponentStrategy) -> Color {
+        switch strategy {
+        case .random:
+            return .orange
+        case .greedy:
+            return .green
+        case .defensive:
+            return .blue
+        case .optimal:
+            return .purple
+        }
     }
 }
 

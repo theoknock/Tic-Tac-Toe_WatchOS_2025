@@ -26,6 +26,37 @@ enum Player: String {
     }
 }
 
+enum AIAlgorithm: String, CaseIterable, Identifiable {
+    case ruleBased = "Rule-Based"
+    case minimax = "Minimax"
+    case alphaBeta = "Alpha-Beta"
+    case mcts = "MCTS"
+    case mctsProbabilistic = "MCTS + Model"
+    case qLearning = "Q-Learning"
+    case lookupTable = "Lookup Table"
+
+    var id: String { rawValue }
+
+    var strategy: TicTacToeAIStrategy {
+        switch self {
+        case .ruleBased:
+            return RuleBasedStrategy()
+        case .minimax:
+            return MinimaxStrategy()
+        case .alphaBeta:
+            return AlphaBetaStrategy()
+        case .mcts:
+            return MCTSStrategy()
+        case .mctsProbabilistic:
+            return MCTSProbabilisticStrategy()
+        case .qLearning:
+            return QLearningStrategy()
+        case .lookupTable:
+            return LookupTableStrategy()
+        }
+    }
+}
+
 struct GameCell: Identifiable {
     let id: Int
     var player: Player?
@@ -42,6 +73,7 @@ struct GameHistory: Identifiable {
     let date: Date
     let result: GameResult
     let moveCount: Int
+    let algorithm: AIAlgorithm
 
     var resultText: String {
         switch result {
@@ -69,6 +101,18 @@ struct GameHistory: Identifiable {
     var gameHistory: [GameHistory] = []
 
     var currentTheme: GameTheme = .classic
+    var selectedAlgorithm: AIAlgorithm = .ruleBased
+
+    private var mctsProbabilisticStrategy: MCTSProbabilisticStrategy?
+
+    var opponentBeliefs: [OpponentStrategy: Double] {
+        mctsProbabilisticStrategy?.opponentBeliefs ?? [
+            .random: 0.25,
+            .greedy: 0.25,
+            .defensive: 0.25,
+            .optimal: 0.25
+        ]
+    }
 
     override init() {
         super.init()
@@ -114,7 +158,7 @@ struct GameHistory: Identifiable {
             return
         }
 
-        let history = GameHistory(date: Date(), result: result, moveCount: moveCount)
+        let history = GameHistory(date: Date(), result: result, moveCount: moveCount, algorithm: selectedAlgorithm)
         gameHistory.insert(history, at: 0)
     }
 
@@ -124,6 +168,13 @@ struct GameHistory: Identifiable {
         cells[index].player = .x
         moveCount += 1
         playHaptic(.click)
+
+        if selectedAlgorithm == .mctsProbabilistic {
+            if mctsProbabilisticStrategy == nil {
+                mctsProbabilisticStrategy = MCTSProbabilisticStrategy()
+            }
+            mctsProbabilisticStrategy?.updateOpponentModel(humanMove: index, cells: cells)
+        }
 
         if checkWin(for: .x) {
             winner = .x
@@ -143,9 +194,20 @@ struct GameHistory: Identifiable {
         guard !gameOver else { return }
 
         Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 500_000_000)
+            let delay: UInt64 = selectedAlgorithm == .mctsProbabilistic ? 300_000_000 : 500_000_000
+            try? await Task.sleep(nanoseconds: delay)
 
-            guard let move = findBestMove() else { return }
+            let strategy: TicTacToeAIStrategy
+            if selectedAlgorithm == .mctsProbabilistic {
+                if mctsProbabilisticStrategy == nil {
+                    mctsProbabilisticStrategy = MCTSProbabilisticStrategy()
+                }
+                strategy = mctsProbabilisticStrategy!
+            } else {
+                strategy = selectedAlgorithm.strategy
+            }
+
+            guard let move = strategy.findMove(cells: cells, player: .o) else { return }
 
             cells[move].player = .o
             moveCount += 1
@@ -163,46 +225,6 @@ struct GameHistory: Identifiable {
                 currentPlayer = .x
             }
         }
-    }
-
-    private func findBestMove() -> Int? {
-        if let winMove = findWinningMove(for: .o) {
-            return winMove
-        }
-
-        if let blockMove = findWinningMove(for: .x) {
-            return blockMove
-        }
-
-        if cells[4].player == nil {
-            return 4
-        }
-
-        let corners = [0, 2, 6, 8]
-        if let corner = corners.shuffled().first(where: { cells[$0].player == nil }) {
-            return corner
-        }
-
-        return cells.indices.filter { cells[$0].player == nil }.randomElement()
-    }
-
-    private func findWinningMove(for player: Player) -> Int? {
-        let winPatterns: [[Int]] = [
-            [0, 1, 2], [3, 4, 5], [6, 7, 8],
-            [0, 3, 6], [1, 4, 7], [2, 5, 8],
-            [0, 4, 8], [2, 4, 6]
-        ]
-
-        for pattern in winPatterns {
-            let playerCells = pattern.filter { cells[$0].player == player }
-            let emptyCells = pattern.filter { cells[$0].player == nil }
-
-            if playerCells.count == 2 && emptyCells.count == 1 {
-                return emptyCells[0]
-            }
-        }
-
-        return nil
     }
 
     private func checkWin(for player: Player) -> Bool {
@@ -279,5 +301,15 @@ struct GameHistory: Identifiable {
         guard !gameHistory.isEmpty else { return 0 }
         let totalMoves = gameHistory.reduce(0) { $0 + $1.moveCount }
         return Double(totalMoves) / Double(gameHistory.count)
+    }
+
+    func algorithmStats(for algorithm: AIAlgorithm) -> (wins: Int, losses: Int, draws: Int, winRate: Double) {
+        let games = gameHistory.filter { $0.algorithm == algorithm }
+        let wins = games.filter { $0.result == .playerWin }.count
+        let losses = games.filter { $0.result == .watchWin }.count
+        let draws = games.filter { $0.result == .draw }.count
+        let total = games.count
+        let winRate = total > 0 ? Double(wins) / Double(total) * 100 : 0
+        return (wins, losses, draws, winRate)
     }
 }
