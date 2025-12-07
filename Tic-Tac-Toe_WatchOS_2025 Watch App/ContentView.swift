@@ -108,14 +108,6 @@ struct ButtonMenuView: View {
                 }
             }
 
-            if game.playerWins + game.watchWins + game.draws > 0 {
-                Button("Reset Scores") {
-                    game.resetScores()
-                }
-                .font(.caption)
-                .foregroundColor(.secondary)
-            }
-
             Spacer()
         }
         .padding()
@@ -317,6 +309,17 @@ struct StatisticsView: View {
                     ForEach(game.gameHistory.prefix(10)) { history in
                         GameHistoryRow(history: history, theme: game.currentTheme)
                     }
+                }
+
+                if game.playerWins + game.watchWins + game.draws > 0 {
+                    Divider()
+                        .padding(.vertical, .small)
+
+                    Button("Reset Scores") {
+                        game.resetScores()
+                    }
+                    .font(.caption)
+                    .foregroundColor(.red)
                 }
             }
             .padding()
