@@ -31,6 +31,27 @@ struct GameCell: Identifiable {
     var player: Player?
 }
 
+enum GameResult {
+    case playerWin
+    case watchWin
+    case draw
+}
+
+struct GameHistory: Identifiable {
+    let id = UUID()
+    let date: Date
+    let result: GameResult
+    let moveCount: Int
+
+    var resultText: String {
+        switch result {
+        case .playerWin: return "You Won"
+        case .watchWin: return "Watch Won"
+        case .draw: return "Draw"
+        }
+    }
+}
+
 @Observable class TicTacToeGame: NSObject {
     var cells: [GameCell] = []
     var currentPlayer: Player = .x
@@ -39,10 +60,13 @@ struct GameCell: Identifiable {
     var isDraw: Bool = false
     var winningPattern: [Int] = []
     var gameID: UUID = UUID()
+    var moveCount: Int = 0
 
     var playerWins: Int = 0
     var watchWins: Int = 0
     var draws: Int = 0
+
+    var gameHistory: [GameHistory] = []
 
     override init() {
         super.init()
@@ -61,30 +85,42 @@ struct GameCell: Identifiable {
         isDraw = false
         winningPattern = []
         gameID = UUID()
+        moveCount = 0
     }
 
     func resetScores() {
         playerWins = 0
         watchWins = 0
         draws = 0
+        gameHistory = []
     }
 
     private func updateScores() {
+        let result: GameResult
         if let winner = winner {
             if winner == .x {
                 playerWins += 1
+                result = .playerWin
             } else {
                 watchWins += 1
+                result = .watchWin
             }
         } else if isDraw {
             draws += 1
+            result = .draw
+        } else {
+            return
         }
+
+        let history = GameHistory(date: Date(), result: result, moveCount: moveCount)
+        gameHistory.insert(history, at: 0)
     }
 
     func makeMove(at index: Int) {
         guard !gameOver, cells[index].player == nil, currentPlayer == .x else { return }
 
         cells[index].player = .x
+        moveCount += 1
         playHaptic(.click)
 
         if checkWin(for: .x) {
@@ -110,6 +146,7 @@ struct GameCell: Identifiable {
             guard let move = findBestMove() else { return }
 
             cells[move].player = .o
+            moveCount += 1
             playHaptic(.click)
 
             if checkWin(for: .o) {
@@ -198,5 +235,47 @@ struct GameCell: Identifiable {
 
     private func playHaptic(_ type: WKHapticType) {
         WKInterfaceDevice.current().play(type)
+    }
+
+    // Statistics computed properties
+    var totalGames: Int {
+        playerWins + watchWins + draws
+    }
+
+    var winPercentage: Double {
+        guard totalGames > 0 else { return 0 }
+        return Double(playerWins) / Double(totalGames) * 100
+    }
+
+    var currentStreak: Int {
+        var streak = 0
+        for game in gameHistory {
+            if game.result == .playerWin {
+                streak += 1
+            } else {
+                break
+            }
+        }
+        return streak
+    }
+
+    var longestStreak: Int {
+        var longest = 0
+        var current = 0
+        for game in gameHistory.reversed() {
+            if game.result == .playerWin {
+                current += 1
+                longest = max(longest, current)
+            } else {
+                current = 0
+            }
+        }
+        return longest
+    }
+
+    var averageMovesPerGame: Double {
+        guard !gameHistory.isEmpty else { return 0 }
+        let totalMoves = gameHistory.reduce(0) { $0 + $1.moveCount }
+        return Double(totalMoves) / Double(gameHistory.count)
     }
 }

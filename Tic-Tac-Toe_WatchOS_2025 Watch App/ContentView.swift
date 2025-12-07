@@ -12,9 +12,11 @@ import Combine
 struct ContentView: View {
     @State private var game = TicTacToeGame()
     @State private var celebrationScale: CGFloat = 1.0
+    @State private var showingStats = false
 
     var body: some View {
-        VStack(spacing: 6) {
+        NavigationStack {
+            VStack(spacing: 6) {
             ScoreView(playerWins: game.playerWins, watchWins: game.watchWins, draws: game.draws)
 
             Text(game.statusMessage)
@@ -57,6 +59,14 @@ struct ContentView: View {
                 .transition(.scale.combined(with: .opacity))
             }
 
+            if game.totalGames > 0 {
+                NavigationLink(destination: StatisticsView(game: game)) {
+                    Label("Stats", systemImage: "chart.bar.fill")
+                }
+                .font(.caption)
+                .padding(.top, 2)
+            }
+
             if game.playerWins + game.watchWins + game.draws > 0 {
                 Button("Reset Scores") {
                     game.resetScores()
@@ -65,9 +75,10 @@ struct ContentView: View {
                 .foregroundColor(.secondary)
                 .transition(.opacity)
             }
+            }
+            .padding(.vertical, 4)
+            .animation(.easeInOut(duration: 0.3), value: game.gameOver)
         }
-        .padding(.vertical, 4)
-        .animation(.easeInOut(duration: 0.3), value: game.gameOver)
     }
 }
 
@@ -149,6 +160,88 @@ struct CellView: View {
                     }
             }
         }
+    }
+}
+
+struct StatisticsView: View {
+    let game: TicTacToeGame
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 12) {
+                Text("Statistics")
+                    .font(.title3)
+                    .fontWeight(.bold)
+
+                VStack(spacing: 8) {
+                    StatRow(label: "Total Games", value: "\(game.totalGames)")
+                    StatRow(label: "Win Rate", value: String(format: "%.1f%%", game.winPercentage))
+                    StatRow(label: "Current Streak", value: "\(game.currentStreak)")
+                    StatRow(label: "Longest Streak", value: "\(game.longestStreak)")
+                    StatRow(label: "Avg Moves", value: String(format: "%.1f", game.averageMovesPerGame))
+                }
+
+                if !game.gameHistory.isEmpty {
+                    Divider()
+                        .padding(.vertical, 4)
+
+                    Text("Recent Games")
+                        .font(.headline)
+                        .padding(.bottom, 4)
+
+                    ForEach(game.gameHistory.prefix(10)) { history in
+                        GameHistoryRow(history: history)
+                    }
+                }
+            }
+            .padding()
+        }
+    }
+}
+
+struct StatRow: View {
+    let label: String
+    let value: String
+
+    var body: some View {
+        HStack {
+            Text(label)
+                .font(.caption)
+                .foregroundColor(.secondary)
+            Spacer()
+            Text(value)
+                .font(.body)
+                .fontWeight(.semibold)
+        }
+    }
+}
+
+struct GameHistoryRow: View {
+    let history: GameHistory
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(history.resultText)
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundColor(history.result == .playerWin ? .blue : (history.result == .watchWin ? .red : .gray))
+                Text("\(history.moveCount) moves")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+            Spacer()
+            Text(formatDate(history.date))
+                .font(.caption2)
+                .foregroundColor(.secondary)
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
     }
 }
 
