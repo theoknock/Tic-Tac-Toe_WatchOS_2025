@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import Observation
+import WatchKit
 
 enum Player: String {
     case x = "X"
@@ -80,13 +81,16 @@ struct GameCell: Identifiable {
         guard !gameOver, cells[index].player == nil, currentPlayer == .x else { return }
 
         cells[index].player = .x
+        playHaptic(.click)
 
         if checkWin(for: .x) {
             winner = .x
             gameOver = true
+            playHaptic(.success)
         } else if cells.allSatisfy({ $0.player != nil }) {
             isDraw = true
             gameOver = true
+            playHaptic(.notification)
         } else {
             currentPlayer = .o
             makeAIMove()
@@ -102,13 +106,16 @@ struct GameCell: Identifiable {
             guard let move = findBestMove() else { return }
 
             cells[move].player = .o
+            playHaptic(.click)
 
             if checkWin(for: .o) {
                 winner = .o
                 gameOver = true
+                playHaptic(.failure)
             } else if cells.allSatisfy({ $0.player != nil }) {
                 isDraw = true
                 gameOver = true
+                playHaptic(.notification)
             } else {
                 currentPlayer = .x
             }
@@ -175,5 +182,9 @@ struct GameCell: Identifiable {
         } else {
             return currentPlayer == .x ? "Your Turn" : "Watch's Turn"
         }
+    }
+
+    private func playHaptic(_ type: WKHapticType) {
+        WKInterfaceDevice.current().play(type)
     }
 }
