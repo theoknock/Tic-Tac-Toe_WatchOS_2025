@@ -100,6 +100,7 @@ struct GameHistory: Identifiable {
     var draws: Int = 0
 
     var gameHistory: [GameHistory] = []
+    var shouldShowStatistics: Bool = false
 
     var currentTheme: GameTheme = .classic
     var selectedAlgorithm: AIAlgorithm = .ruleBased
@@ -130,6 +131,7 @@ struct GameHistory: Identifiable {
         winningPattern = []
         gameID = UUID()
         moveCount = 0
+        shouldShowStatistics = false
     }
 
     func resetScores() {
@@ -158,6 +160,7 @@ struct GameHistory: Identifiable {
 
         let history = GameHistory(date: Date(), result: result, moveCount: moveCount, algorithm: selectedAlgorithm)
         gameHistory.insert(history, at: 0)
+        shouldShowStatistics = true
     }
 
     func makeMove(at index: Int) {

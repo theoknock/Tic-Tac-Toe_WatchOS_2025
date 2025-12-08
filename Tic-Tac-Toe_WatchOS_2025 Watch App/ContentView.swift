@@ -16,10 +16,10 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack {
-            if game.gameOver {
+            if game.shouldShowStatistics {
                 StatisticsView(game: game, celebrationScale: $celebrationScale)
                     .transition(.opacity)
-            } else if game.isPaused {
+            } else if game.gameOver || game.isPaused {
                 ButtonMenuView(game: game, celebrationScale: $celebrationScale)
                     .transition(.opacity)
             } else {
@@ -27,6 +27,7 @@ struct ContentView: View {
                     .transition(.opacity)
             }
         }
+        .animation(.easeInOut(duration: 0.3), value: game.shouldShowStatistics)
         .animation(.easeInOut(duration: 0.3), value: game.gameOver)
         .animation(.easeInOut(duration: 0.3), value: game.isPaused)
     }
