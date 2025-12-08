@@ -27,9 +27,6 @@ struct ContentView: View {
                             }
                         }
                     }
-            } else if game.shouldShowStatistics {
-                StatisticsView(game: game, celebrationScale: $celebrationScale)
-                    .transition(.opacity)
             } else if game.gameOver || game.isPaused {
                 ButtonMenuView(game: game, celebrationScale: $celebrationScale)
                     .transition(.opacity)
@@ -39,7 +36,6 @@ struct ContentView: View {
             }
         }
         .animation(.easeInOut(duration: 0.3), value: showingAbout)
-        .animation(.easeInOut(duration: 0.3), value: game.shouldShowStatistics)
         .animation(.easeInOut(duration: 0.3), value: game.gameOver)
         .animation(.easeInOut(duration: 0.3), value: game.isPaused)
     }
@@ -328,15 +324,6 @@ struct StatisticsView: View {
                 }
             }
             .padding()
-        }
-        .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button {
-                    game.shouldShowStatistics = false
-                } label: {
-                    Image(systemName: "chevron.left")
-                }
-            }
         }
     }
 }
