@@ -1,6 +1,6 @@
 # Tic-Tac-Toe for Apple Watch
 
-A feature-rich Tic-Tac-Toe game built natively for watchOS, featuring seven different AI algorithms, customizable themes, and comprehensive statistics tracking.
+A feature-rich Tic-Tac-Toe game built natively for watchOS, featuring seven different algorithms, customizable themes, and comprehensive statistics tracking.
 
 ## Features
 
@@ -11,15 +11,15 @@ A feature-rich Tic-Tac-Toe game built natively for watchOS, featuring seven diff
 - **Haptic feedback** for moves and game events
 - **Winning cell highlighting** with pulsing animation
 
-### 🤖 AI Algorithms (7 Strategies)
+### 🤖 Algorithms (7 Strategies)
 
-Choose from seven different AI opponents, each with unique playing styles:
+Choose from seven different computer opponents, each with unique playing styles:
 
 1. **Rule-Based** - Classic heuristic approach with win/block/fork logic
 2. **Minimax** - Exhaustive game tree search for perfect play
 3. **Alpha-Beta Pruning** - Optimized Minimax with branch elimination
 4. **Monte Carlo Tree Search (MCTS)** - Simulation-based decision making
-5. **MCTS + Opponent Modeling** - Adaptive AI that learns your playing style
+5. **MCTS + Opponent Modeling** - Adaptive algorithm that learns your playing style
 6. **Q-Learning** - Reinforcement learning with experience replay
 7. **Lookup Table** - Pre-computed optimal moves for instant response
 
@@ -35,7 +35,7 @@ Choose from seven different AI opponents, each with unique playing styles:
 ### 📊 Statistics & Analytics
 
 - **Overall statistics**: Total games, win rate, current/longest streak
-- **Per-algorithm performance**: Win/loss/draw breakdown for each AI
+- **Per-algorithm performance**: Win/loss/draw breakdown for each algorithm
 - **Game history**: Recent games with move counts and timestamps
 - **Average moves per game** tracking
 - **Persistent score tracking** with reset option
@@ -91,15 +91,15 @@ Choose from seven different AI opponents, each with unique playing styles:
 The app follows a clean MVVM-like architecture:
 
 - **`TicTacToeGame`** - Observable game state and logic
-- **`TicTacToeAIStrategy`** - Protocol for AI implementations
+- **`TicTacToeAIStrategy`** - Protocol for algorithm implementations
 - **`GameTheme`** - Theme configuration and color schemes
 - **SwiftUI Views** - Declarative UI components
 - **Design Tokens** - Consistent spacing and sizing via CGFloat extensions
 
-## AI Implementation Highlights
+## Implementation Highlights
 
 ### Opponent Modeling (MCTS + Model)
-The most advanced AI uses Bayesian inference to build a probabilistic model of the player's strategy:
+The most advanced algorithm uses Bayesian inference to build a probabilistic model of the player's strategy:
 - Tracks move patterns to classify playing style
 - Updates beliefs based on observed moves
 - Adapts strategy in real-time
@@ -120,8 +120,8 @@ Tic-Tac-Toe_WatchOS_2025/
 ├── Tic-Tac-Toe_WatchOS_2025 Watch App/
 │   ├── ContentView.swift          # Main UI views
 │   ├── TicTacToeGame.swift        # Game logic and state
-│   ├── TicTacToeAIStrategy.swift  # AI strategy protocol
-│   ├── AIStrategies.swift         # AI implementations
+│   ├── TicTacToeAIStrategy.swift  # Strategy protocol
+│   ├── AIStrategies.swift         # Algorithm implementations
 │   ├── Theme.swift                # Theme definitions
 │   ├── DesignTokens.swift         # Design system
 │   └── Assets.xcassets/           # App icon and colors
@@ -143,7 +143,7 @@ xcodebuild -scheme "Tic-Tac-Toe_WatchOS_2025 Watch App" \
 
 ### Version 1.0 (Current)
 - Initial release
-- Seven AI algorithms
+- Seven algorithms
 - Six visual themes
 - Comprehensive statistics
 - Game pause/resume
