@@ -16,7 +16,10 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack {
-            if game.gameOver || game.isPaused {
+            if game.gameOver {
+                StatisticsView(game: game, celebrationScale: $celebrationScale)
+                    .transition(.opacity)
+            } else if game.isPaused {
                 ButtonMenuView(game: game, celebrationScale: $celebrationScale)
                     .transition(.opacity)
             } else {
@@ -35,25 +38,6 @@ struct BoardView: View {
 
     var body: some View {
         VStack(spacing: .small) {
-            Text(game.statusMessage)
-                .font(.headline)
-                .foregroundColor(game.winner?.color(for: game.currentTheme) ?? .white)
-                .padding(.bottom, .xxSmall)
-                .scaleEffect(celebrationScale)
-                .animation(.spring(response: 0.3, dampingFraction: 0.5), value: celebrationScale)
-                .onChange(of: game.gameOver) { _, isOver in
-                    if isOver {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
-                            celebrationScale = 1.2
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
-                                celebrationScale = 1.0
-                            }
-                        }
-                    }
-                }
-
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: .small) {
                 ForEach(game.cells) { cell in
                     CellView(player: cell.player, isWinningCell: game.isWinningCell(cell.id), theme: game.currentTheme)
@@ -81,11 +65,6 @@ struct ButtonMenuView: View {
         VStack(spacing: .large) {
             Spacer()
 
-            Text(game.statusMessage)
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(game.winner?.color(for: game.currentTheme) ?? .white)
-
             Button("New Game") {
                 celebrationScale = 1.0
                 game.isPaused = false
@@ -104,7 +83,7 @@ struct ButtonMenuView: View {
                 .padding(.vertical, .small)
 
             HStack(spacing: .medium) {
-                NavigationLink(destination: StatisticsView(game: game)) {
+                NavigationLink(destination: StatisticsView(game: game, celebrationScale: $celebrationScale)) {
                     Image(systemName: "chart.bar.fill")
                         .font(.title3)
                 }
@@ -277,10 +256,37 @@ struct ThemePreviewButton: View {
 
 struct StatisticsView: View {
     let game: TicTacToeGame
+    @Binding var celebrationScale: CGFloat
 
     var body: some View {
         ScrollView {
             VStack(spacing: .large) {
+                if game.gameOver {
+                    Text(game.statusMessage)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(game.winner?.color(for: game.currentTheme) ?? .white)
+                        .scaleEffect(celebrationScale)
+                        .animation(.spring(response: 0.3, dampingFraction: 0.5), value: celebrationScale)
+                        .onAppear {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+                                celebrationScale = 1.2
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+                                    celebrationScale = 1.0
+                                }
+                            }
+                        }
+
+                    Button("New Game") {
+                        celebrationScale = 1.0
+                        game.resetGame()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .padding(.bottom, .small)
+                }
+
                 Text("Statistics")
                     .font(.title3)
                     .fontWeight(.bold)
