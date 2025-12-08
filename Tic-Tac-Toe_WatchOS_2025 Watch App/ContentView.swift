@@ -13,10 +13,21 @@ struct ContentView: View {
     @State private var game = TicTacToeGame()
     @State private var celebrationScale: CGFloat = 1.0
     @State private var showingStats = false
+    @State private var showingAbout = true
 
     var body: some View {
         NavigationStack {
-            if game.shouldShowStatistics {
+            if showingAbout {
+                AboutView()
+                    .transition(.opacity)
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                            withAnimation(.easeInOut(duration: 0.5)) {
+                                showingAbout = false
+                            }
+                        }
+                    }
+            } else if game.shouldShowStatistics {
                 StatisticsView(game: game, celebrationScale: $celebrationScale)
                     .transition(.opacity)
             } else if game.gameOver || game.isPaused {
@@ -27,6 +38,7 @@ struct ContentView: View {
                     .transition(.opacity)
             }
         }
+        .animation(.easeInOut(duration: 0.3), value: showingAbout)
         .animation(.easeInOut(duration: 0.3), value: game.shouldShowStatistics)
         .animation(.easeInOut(duration: 0.3), value: game.gameOver)
         .animation(.easeInOut(duration: 0.3), value: game.isPaused)
@@ -552,6 +564,49 @@ struct OpponentModelView: View {
         case .optimal:
             return .purple
         }
+    }
+}
+
+struct AboutView: View {
+    private var appVersion: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0"
+    }
+
+    private var buildNumber: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1"
+    }
+
+    var body: some View {
+        VStack(spacing: .large) {
+            Spacer()
+
+            VStack(spacing: .medium) {
+                Text("Tic-Tac-Toe")
+                    .font(.title2)
+                    .fontWeight(.bold)
+
+                Text("Developed by")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Text("James Alan Bush")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+            }
+
+            Spacer()
+
+            VStack(spacing: .xxSmall) {
+                Text("Version \(appVersion)")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+
+                Text("Build \(buildNumber)")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding()
     }
 }
 
