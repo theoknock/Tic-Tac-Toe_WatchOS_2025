@@ -11,7 +11,7 @@ import SwiftUI
 struct Tic_Tac_Toe_WatchOS_2025_Watch_AppApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView()                
         }
     }
 }
