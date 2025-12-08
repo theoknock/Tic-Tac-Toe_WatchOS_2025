@@ -14,6 +14,7 @@ struct ContentView: View {
     @State private var celebrationScale: CGFloat = 1.0
     @State private var showingStats = false
     @State private var showingAbout = true
+    @State private var showStatsFirst = false
 
     var body: some View {
         NavigationStack {
@@ -27,6 +28,9 @@ struct ContentView: View {
                             }
                         }
                     }
+            } else if game.gameOver && showStatsFirst {
+                StatisticsView(game: game, celebrationScale: $celebrationScale, showMenu: $showStatsFirst)
+                    .transition(.opacity)
             } else if game.gameOver || game.isPaused {
                 ButtonMenuView(game: game, celebrationScale: $celebrationScale)
                     .transition(.opacity)
@@ -38,6 +42,15 @@ struct ContentView: View {
         .animation(.easeInOut(duration: 0.3), value: showingAbout)
         .animation(.easeInOut(duration: 0.3), value: game.gameOver)
         .animation(.easeInOut(duration: 0.3), value: game.isPaused)
+        .animation(.easeInOut(duration: 0.3), value: showStatsFirst)
+        .onChange(of: game.gameOver) { oldValue, newValue in
+            if newValue && !oldValue {
+                showStatsFirst = true
+            }
+        }
+        .onChange(of: game.gameID) { _, _ in
+            showStatsFirst = false
+        }
     }
 }
 
@@ -266,6 +279,7 @@ struct ThemePreviewButton: View {
 struct StatisticsView: View {
     let game: TicTacToeGame
     @Binding var celebrationScale: CGFloat
+    var showMenu: Binding<Bool>? = nil
 
     var body: some View {
         ScrollView {
@@ -276,6 +290,14 @@ struct StatisticsView: View {
 
                 ScoreView(playerWins: game.playerWins, watchWins: game.watchWins, draws: game.draws, theme: game.currentTheme)
                     .padding(.bottom, .small)
+
+                if let showMenuBinding = showMenu {
+                    Button("Show Menu") {
+                        showMenuBinding.wrappedValue = false
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .padding(.bottom, .small)
+                }
 
                 VStack(spacing: .medium) {
                     StatRow(label: "Total Games", value: "\(game.totalGames)")

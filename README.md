@@ -11,7 +11,7 @@ A feature-rich Tic-Tac-Toe game built natively for watchOS, featuring seven diff
 - **Haptic feedback** for moves and game events
 - **Winning cell highlighting** with pulsing animation
 
-### 🤖 Algorithms (7 Strategies)
+### 🤖 Game Theory Algorithms (7 Strategies)
 
 Choose from seven different computer opponents, each with unique playing styles:
 
@@ -35,7 +35,7 @@ Choose from seven different computer opponents, each with unique playing styles:
 ### 📊 Statistics & Analytics
 
 - **Overall statistics**: Total games, win rate, current/longest streak
-- **Per-algorithm performance**: Win/loss/draw breakdown for each algorithm
+- **Per-algorithm performance**: Win/loss/draw breakdown for each game theory algorithm
 - **Game history**: Recent games with move counts and timestamps
 - **Average moves per game** tracking
 - **Persistent score tracking** with reset option
@@ -46,8 +46,8 @@ Choose from seven different computer opponents, each with unique playing styles:
 - **App icon** with custom tic-tac-toe grid design
 - **Pause menu** accessible via long-press during gameplay
 - **Theme picker** with live preview
-- **Algorithm picker** with detailed strategy descriptions
-- **Opponent belief visualization** (for MCTS + Model algorithm)
+- **Game Theory Algorithm picker** with detailed strategy descriptions
+- **Opponent belief visualization** (for MCTS + Model game theory algorithm)
 
 ## Requirements
 
@@ -91,7 +91,7 @@ Choose from seven different computer opponents, each with unique playing styles:
 The app follows a clean MVVM-like architecture:
 
 - **`TicTacToeGame`** - Observable game state and logic
-- **`TicTacToeAIStrategy`** - Protocol for algorithm implementations
+- **`TicTacToeAIStrategy`** - Protocol for game theory algorithm implementations
 - **`GameTheme`** - Theme configuration and color schemes
 - **SwiftUI Views** - Declarative UI components
 - **Design Tokens** - Consistent spacing and sizing via CGFloat extensions
@@ -99,7 +99,7 @@ The app follows a clean MVVM-like architecture:
 ## Implementation Highlights
 
 ### Opponent Modeling (MCTS + Model)
-The most advanced algorithm uses Bayesian inference to build a probabilistic model of the player's strategy:
+The most advanced game theory algorithm uses Bayesian inference to build a probabilistic model of the player's strategy:
 - Tracks move patterns to classify playing style
 - Updates beliefs based on observed moves
 - Adapts strategy in real-time
@@ -121,7 +121,7 @@ Tic-Tac-Toe_WatchOS_2025/
 │   ├── ContentView.swift          # Main UI views
 │   ├── TicTacToeGame.swift        # Game logic and state
 │   ├── TicTacToeAIStrategy.swift  # Strategy protocol
-│   ├── AIStrategies.swift         # Algorithm implementations
+│   ├── AIStrategies.swift         # Game Theory Algorithm implementations
 │   ├── Theme.swift                # Theme definitions
 │   ├── DesignTokens.swift         # Design system
 │   └── Assets.xcassets/           # App icon and colors
@@ -143,7 +143,7 @@ xcodebuild -scheme "Tic-Tac-Toe_WatchOS_2025 Watch App" \
 
 ### Version 1.0 (Current)
 - Initial release
-- Seven algorithms
+- Seven game theory algorithms
 - Six visual themes
 - Comprehensive statistics
 - Game pause/resume
