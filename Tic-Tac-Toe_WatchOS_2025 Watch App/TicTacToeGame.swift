@@ -189,11 +189,11 @@ struct GameHistory: Identifiable {
             playHaptic(.notification)
         } else {
             currentPlayer = .o
-            makeAIMove()
+            makeAlgorithmMove()
         }
     }
 
-    private func makeAIMove() {
+    private func makeAlgorithmMove() {
         guard !gameOver else { return }
 
         Task { @MainActor in
