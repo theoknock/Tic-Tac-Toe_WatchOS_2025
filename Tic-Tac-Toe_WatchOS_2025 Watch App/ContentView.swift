@@ -274,32 +274,6 @@ struct StatisticsView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: .large) {
-                if game.gameOver {
-                    Text(game.statusMessage)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(game.winner?.color(for: game.currentTheme) ?? .white)
-                        .scaleEffect(celebrationScale)
-                        .animation(.spring(response: 0.3, dampingFraction: 0.5), value: celebrationScale)
-                        .onAppear {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
-                                celebrationScale = 1.2
-                            }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
-                                    celebrationScale = 1.0
-                                }
-                            }
-                        }
-
-                    Button("New Game") {
-                        celebrationScale = 1.0
-                        game.resetGame()
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .padding(.bottom, .small)
-                }
-
                 Text("Statistics")
                     .font(.title3)
                     .fontWeight(.bold)
