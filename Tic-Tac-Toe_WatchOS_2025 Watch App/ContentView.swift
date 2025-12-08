@@ -14,7 +14,7 @@ struct ContentView: View {
     @State private var celebrationScale: CGFloat = 1.0
     @State private var showingStats = false
     @State private var showingAbout = true
-    @State private var showStatsFirst = false
+    @State private var showWinningLine = false
 
     var body: some View {
         NavigationStack {
@@ -28,9 +28,16 @@ struct ContentView: View {
                             }
                         }
                     }
-            } else if game.gameOver && showStatsFirst {
-                StatisticsView(game: game, celebrationScale: $celebrationScale, showMenu: $showStatsFirst)
+            } else if game.gameOver && showWinningLine {
+                BoardView(game: game, celebrationScale: $celebrationScale)
                     .transition(.opacity)
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                            withAnimation(.easeInOut(duration: 0.5)) {
+                                showWinningLine = false
+                            }
+                        }
+                    }
             } else if game.gameOver || game.isPaused {
                 ButtonMenuView(game: game, celebrationScale: $celebrationScale)
                     .transition(.opacity)
@@ -42,14 +49,14 @@ struct ContentView: View {
         .animation(.easeInOut(duration: 0.3), value: showingAbout)
         .animation(.easeInOut(duration: 0.3), value: game.gameOver)
         .animation(.easeInOut(duration: 0.3), value: game.isPaused)
-        .animation(.easeInOut(duration: 0.3), value: showStatsFirst)
+        .animation(.easeInOut(duration: 0.3), value: showWinningLine)
         .onChange(of: game.gameOver) { oldValue, newValue in
             if newValue && !oldValue {
-                showStatsFirst = true
+                showWinningLine = true
             }
         }
         .onChange(of: game.gameID) { _, _ in
-            showStatsFirst = false
+            showWinningLine = false
         }
     }
 }
@@ -60,12 +67,20 @@ struct BoardView: View {
 
     var body: some View {
         VStack(spacing: .small) {
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: .small) {
-                ForEach(game.cells) { cell in
-                    CellView(player: cell.player, isWinningCell: game.isWinningCell(cell.id), theme: game.currentTheme)
-                        .onTapGesture {
-                            game.makeMove(at: cell.id)
+            GeometryReader { geometry in
+                ZStack {
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: .small) {
+                        ForEach(game.cells) { cell in
+                            CellView(player: cell.player, isWinningCell: game.isWinningCell(cell.id), theme: game.currentTheme)
+                                .onTapGesture {
+                                    game.makeMove(at: cell.id)
+                                }
                         }
+                    }
+
+                    if game.gameOver {
+                        WinningLineView(game: game, size: geometry.size)
+                    }
                 }
             }
             .padding(.horizontal, .medium)
@@ -76,6 +91,88 @@ struct BoardView: View {
         .onLongPressGesture(minimumDuration: 0.5) {
             game.isPaused = true
         }
+    }
+}
+
+struct WinningLineView: View {
+    let game: TicTacToeGame
+    let size: CGSize
+    @State private var animateStroke = false
+
+    var body: some View {
+        if game.isDraw {
+            // Draw squiggly line for draw
+            SquigglyPath()
+                .trim(from: 0, to: animateStroke ? 1 : 0)
+                .stroke(game.currentTheme.winningLineColor, lineWidth: 4)
+                .onAppear {
+                    withAnimation(.easeInOut(duration: 1.0)) {
+                        animateStroke = true
+                    }
+                }
+        } else if !game.winningPattern.isEmpty {
+            // Draw straight line through winning cells
+            WinningLinePath(winningPattern: game.winningPattern, gridSize: size)
+                .trim(from: 0, to: animateStroke ? 1 : 0)
+                .stroke(game.currentTheme.winningLineColor, lineWidth: 6)
+                .onAppear {
+                    withAnimation(.easeInOut(duration: 0.5)) {
+                        animateStroke = true
+                    }
+                }
+        }
+    }
+}
+
+struct WinningLinePath: Shape {
+    let winningPattern: [Int]
+    let gridSize: CGSize
+
+    func path(in rect: CGRect) -> Path {
+        guard winningPattern.count == 3 else { return Path() }
+
+        let cellWidth = gridSize.width / 3
+        let cellHeight = gridSize.height / 3
+
+        func cellCenter(_ index: Int) -> CGPoint {
+            let row = index / 3
+            let col = index % 3
+            return CGPoint(
+                x: CGFloat(col) * cellWidth + cellWidth / 2,
+                y: CGFloat(row) * cellHeight + cellHeight / 2
+            )
+        }
+
+        var path = Path()
+        let start = cellCenter(winningPattern[0])
+        let end = cellCenter(winningPattern[2])
+
+        path.move(to: start)
+        path.addLine(to: end)
+
+        return path
+    }
+}
+
+struct SquigglyPath: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let amplitude: CGFloat = 15
+        let frequency: CGFloat = 4
+
+        let startX = rect.minX + 20
+        let endX = rect.maxX - 20
+        let midY = rect.midY
+
+        path.move(to: CGPoint(x: startX, y: midY))
+
+        for x in stride(from: startX, through: endX, by: 2) {
+            let relativeX = (x - startX) / (endX - startX)
+            let y = midY + amplitude * sin(relativeX * frequency * .pi * 2)
+            path.addLine(to: CGPoint(x: x, y: y))
+        }
+
+        return path
     }
 }
 
@@ -279,7 +376,6 @@ struct ThemePreviewButton: View {
 struct StatisticsView: View {
     let game: TicTacToeGame
     @Binding var celebrationScale: CGFloat
-    var showMenu: Binding<Bool>? = nil
 
     var body: some View {
         ScrollView {
@@ -290,14 +386,6 @@ struct StatisticsView: View {
 
                 ScoreView(playerWins: game.playerWins, watchWins: game.watchWins, draws: game.draws, theme: game.currentTheme)
                     .padding(.bottom, .small)
-
-                if let showMenuBinding = showMenu {
-                    Button("Show Menu") {
-                        showMenuBinding.wrappedValue = false
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .padding(.bottom, .small)
-                }
 
                 VStack(spacing: .medium) {
                     StatRow(label: "Total Games", value: "\(game.totalGames)")
