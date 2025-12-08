@@ -66,113 +66,21 @@ struct BoardView: View {
     @Binding var celebrationScale: CGFloat
 
     var body: some View {
-        VStack(spacing: .small) {
-            GeometryReader { geometry in
-                ZStack {
-                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: .small) {
-                        ForEach(game.cells) { cell in
-                            CellView(player: cell.player, isWinningCell: game.isWinningCell(cell.id), theme: game.currentTheme)
-                                .onTapGesture {
-                                    game.makeMove(at: cell.id)
-                                }
-                        }
+        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: .small) {
+            ForEach(game.cells) { cell in
+                CellView(player: cell.player, isWinningCell: game.isWinningCell(cell.id), theme: game.currentTheme)
+                    .onTapGesture {
+                        game.makeMove(at: cell.id)
                     }
-
-                    if game.gameOver {
-                        WinningLineView(game: game, size: geometry.size)
-                    }
-                }
             }
-            .padding(.horizontal, .medium)
-            .id(game.gameID)
-            .background(game.currentTheme.boardBackground)
         }
+        .padding(.horizontal, .medium)
         .padding(.vertical, .small)
+        .id(game.gameID)
+        .background(game.currentTheme.boardBackground)
         .onLongPressGesture(minimumDuration: 0.5) {
             game.isPaused = true
         }
-    }
-}
-
-struct WinningLineView: View {
-    let game: TicTacToeGame
-    let size: CGSize
-    @State private var animateStroke = false
-
-    var body: some View {
-        if game.isDraw {
-            // Draw squiggly line for draw
-            SquigglyPath()
-                .trim(from: 0, to: animateStroke ? 1 : 0)
-                .stroke(game.currentTheme.winningLineColor, lineWidth: 4)
-                .onAppear {
-                    withAnimation(.easeInOut(duration: 1.0)) {
-                        animateStroke = true
-                    }
-                }
-        } else if !game.winningPattern.isEmpty {
-            // Draw straight line through winning cells
-            WinningLinePath(winningPattern: game.winningPattern, gridSize: size)
-                .trim(from: 0, to: animateStroke ? 1 : 0)
-                .stroke(game.currentTheme.winningLineColor, lineWidth: 6)
-                .onAppear {
-                    withAnimation(.easeInOut(duration: 0.5)) {
-                        animateStroke = true
-                    }
-                }
-        }
-    }
-}
-
-struct WinningLinePath: Shape {
-    let winningPattern: [Int]
-    let gridSize: CGSize
-
-    func path(in rect: CGRect) -> Path {
-        guard winningPattern.count == 3 else { return Path() }
-
-        let cellWidth = gridSize.width / 3
-        let cellHeight = gridSize.height / 3
-
-        func cellCenter(_ index: Int) -> CGPoint {
-            let row = index / 3
-            let col = index % 3
-            return CGPoint(
-                x: CGFloat(col) * cellWidth + cellWidth / 2,
-                y: CGFloat(row) * cellHeight + cellHeight / 2
-            )
-        }
-
-        var path = Path()
-        let start = cellCenter(winningPattern[0])
-        let end = cellCenter(winningPattern[2])
-
-        path.move(to: start)
-        path.addLine(to: end)
-
-        return path
-    }
-}
-
-struct SquigglyPath: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        let amplitude: CGFloat = 15
-        let frequency: CGFloat = 4
-
-        let startX = rect.minX + 20
-        let endX = rect.maxX - 20
-        let midY = rect.midY
-
-        path.move(to: CGPoint(x: startX, y: midY))
-
-        for x in stride(from: startX, through: endX, by: 2) {
-            let relativeX = (x - startX) / (endX - startX)
-            let y = midY + amplitude * sin(relativeX * frequency * .pi * 2)
-            path.addLine(to: CGPoint(x: x, y: y))
-        }
-
-        return path
     }
 }
 
