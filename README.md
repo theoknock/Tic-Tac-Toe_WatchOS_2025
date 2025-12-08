@@ -91,7 +91,7 @@ Choose from seven different computer opponents, each with unique playing styles:
 The app follows a clean MVVM-like architecture:
 
 - **`TicTacToeGame`** - Observable game state and logic
-- **`TicTacToeAIStrategy`** - Protocol for game theory algorithm implementations
+- **`TicTacToeGameTheoryStrategy`** - Protocol for game theory algorithm implementations
 - **`GameTheme`** - Theme configuration and color schemes
 - **SwiftUI Views** - Declarative UI components
 - **Design Tokens** - Consistent spacing and sizing via CGFloat extensions
@@ -120,8 +120,7 @@ Tic-Tac-Toe_WatchOS_2025/
 ├── Tic-Tac-Toe_WatchOS_2025 Watch App/
 │   ├── ContentView.swift          # Main UI views
 │   ├── TicTacToeGame.swift        # Game logic and state
-│   ├── TicTacToeAIStrategy.swift  # Strategy protocol
-│   ├── AIStrategies.swift         # Game Theory Algorithm implementations
+│   ├── GameTheoryAlgorithms.swift # Protocol and algorithm implementations
 │   ├── Theme.swift                # Theme definitions
 │   ├── DesignTokens.swift         # Design system
 │   └── Assets.xcassets/           # App icon and colors

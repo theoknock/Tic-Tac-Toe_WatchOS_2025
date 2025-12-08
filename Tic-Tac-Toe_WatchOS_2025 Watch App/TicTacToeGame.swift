@@ -26,7 +26,7 @@ enum Player: String {
     }
 }
 
-enum AIAlgorithm: String, CaseIterable, Identifiable {
+enum GameTheoryAlgorithm: String, CaseIterable, Identifiable {
     case ruleBased = "Rule-Based"
     case minimax = "Minimax"
     case alphaBeta = "Alpha-Beta"
@@ -37,7 +37,7 @@ enum AIAlgorithm: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    var strategy: TicTacToeAIStrategy {
+    var strategy: TicTacToeGameTheoryStrategy {
         switch self {
         case .ruleBased:
             return RuleBasedStrategy()
@@ -73,7 +73,7 @@ struct GameHistory: Identifiable {
     let date: Date
     let result: GameResult
     let moveCount: Int
-    let algorithm: AIAlgorithm
+    let algorithm: GameTheoryAlgorithm
 
     var resultText: String {
         switch result {
@@ -103,7 +103,7 @@ struct GameHistory: Identifiable {
     var shouldShowStatistics: Bool = false
 
     var currentTheme: GameTheme = .classic
-    var selectedAlgorithm: AIAlgorithm = .ruleBased
+    var selectedAlgorithm: GameTheoryAlgorithm = .ruleBased
 
     private var mctsProbabilisticStrategy: MCTSProbabilisticStrategy?
 
@@ -200,7 +200,7 @@ struct GameHistory: Identifiable {
             let delay: UInt64 = selectedAlgorithm == .mctsProbabilistic ? 300_000_000 : 500_000_000
             try? await Task.sleep(nanoseconds: delay)
 
-            let strategy: TicTacToeAIStrategy
+            let strategy: TicTacToeGameTheoryStrategy
             if selectedAlgorithm == .mctsProbabilistic {
                 if mctsProbabilisticStrategy == nil {
                     mctsProbabilisticStrategy = MCTSProbabilisticStrategy()
@@ -308,7 +308,7 @@ struct GameHistory: Identifiable {
         return Double(totalMoves) / Double(gameHistory.count)
     }
 
-    func algorithmStats(for algorithm: AIAlgorithm) -> (wins: Int, losses: Int, draws: Int, winRate: Double) {
+    func algorithmStats(for algorithm: GameTheoryAlgorithm) -> (wins: Int, losses: Int, draws: Int, winRate: Double) {
         let games = gameHistory.filter { $0.algorithm == algorithm }
         let wins = games.filter { $0.result == .playerWin }.count
         let losses = games.filter { $0.result == .watchWin }.count

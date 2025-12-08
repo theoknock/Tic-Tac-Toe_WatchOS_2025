@@ -315,7 +315,7 @@ struct StatisticsView: View {
                         .font(.headline)
                         .padding(.bottom, .small)
 
-                    ForEach(AIAlgorithm.allCases) { algorithm in
+                    ForEach(GameTheoryAlgorithm.allCases) { algorithm in
                         let stats = game.algorithmStats(for: algorithm)
                         if stats.wins + stats.losses + stats.draws > 0 {
                             AlgorithmStatRow(algorithm: algorithm, stats: stats)
@@ -351,7 +351,7 @@ struct StatisticsView: View {
 }
 
 struct AlgorithmStatRow: View {
-    let algorithm: AIAlgorithm
+    let algorithm: GameTheoryAlgorithm
     let stats: (wins: Int, losses: Int, draws: Int, winRate: Double)
 
     var body: some View {
@@ -440,7 +440,7 @@ struct AlgorithmPickerView: View {
                     .fontWeight(.bold)
                     .padding(.bottom, .small)
 
-                ForEach(AIAlgorithm.allCases) { algorithm in
+                ForEach(GameTheoryAlgorithm.allCases) { algorithm in
                     AlgorithmButton(
                         algorithm: algorithm,
                         isSelected: game.selectedAlgorithm == algorithm
@@ -464,7 +464,7 @@ struct AlgorithmPickerView: View {
 }
 
 struct AlgorithmButton: View {
-    let algorithm: AIAlgorithm
+    let algorithm: GameTheoryAlgorithm
     let isSelected: Bool
     let action: () -> Void
 

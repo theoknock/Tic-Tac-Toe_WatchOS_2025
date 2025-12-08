@@ -1,5 +1,5 @@
 //
-//  AIStrategies.swift
+//  GameTheoryAlgorithms.swift
 //  Tic-Tac-Toe_WatchOS_2025 Watch App
 //
 //  Created by Xcode Developer on 12/7/25.
@@ -9,7 +9,7 @@ import Foundation
 
 // MARK: - Protocol
 
-protocol TicTacToeAIStrategy {
+protocol TicTacToeGameTheoryStrategy {
     func findMove(cells: [GameCell], player: Player) -> Int?
     var name: String { get }
     var description: String { get }
@@ -18,7 +18,7 @@ protocol TicTacToeAIStrategy {
 
 // MARK: - Rule-Based Heuristic (Current Implementation)
 
-class RuleBasedStrategy: TicTacToeAIStrategy {
+class RuleBasedStrategy: TicTacToeGameTheoryStrategy {
     let name = "Rule-Based Heuristic"
     let description = "Uses simple priority rules: win if possible, block opponent, take center, corners, then any space"
     let historicalContext = "Classic approach from early computer gaming (1970s-1980s)"
@@ -66,7 +66,7 @@ class RuleBasedStrategy: TicTacToeAIStrategy {
 
 // MARK: - Minimax
 
-class MinimaxStrategy: TicTacToeAIStrategy {
+class MinimaxStrategy: TicTacToeGameTheoryStrategy {
     let name = "Minimax"
     let description = "Explores all possible game states to find optimal moves, assuming perfect play from opponent"
     let historicalContext = "Game theory algorithm developed by John von Neumann (1928)"
@@ -142,7 +142,7 @@ class MinimaxStrategy: TicTacToeAIStrategy {
 
 // MARK: - Alpha-Beta Pruning
 
-class AlphaBetaStrategy: TicTacToeAIStrategy {
+class AlphaBetaStrategy: TicTacToeGameTheoryStrategy {
     let name = "Alpha-Beta Pruning"
     let description = "Optimized minimax that prunes branches that won't affect the final decision"
     let historicalContext = "Optimization developed in the 1950s, popularized by chess programs"
@@ -229,7 +229,7 @@ class AlphaBetaStrategy: TicTacToeAIStrategy {
 
 // MARK: - Monte Carlo Tree Search (Basic)
 
-class MCTSStrategy: TicTacToeAIStrategy {
+class MCTSStrategy: TicTacToeGameTheoryStrategy {
     let name = "Monte Carlo Tree Search"
     let description = "Simulates random games from each position to evaluate moves statistically"
     let historicalContext = "Modern approach popularized by AlphaGo (2016), revolutionized game AI"
@@ -311,7 +311,7 @@ enum OpponentStrategy: String, CaseIterable {
     case optimal = "Optimal"
 }
 
-class MCTSProbabilisticStrategy: TicTacToeAIStrategy {
+class MCTSProbabilisticStrategy: TicTacToeGameTheoryStrategy {
     let name = "MCTS + Opponent Model"
     let description = "MCTS with Bayesian belief distribution over opponent strategies (random, greedy, defensive, optimal)"
     let historicalContext = "Cutting-edge AI combining Monte Carlo methods with opponent modeling (2020s)"
@@ -524,7 +524,7 @@ class MCTSProbabilisticStrategy: TicTacToeAIStrategy {
 
 // MARK: - Q-Learning
 
-class QLearningStrategy: TicTacToeAIStrategy {
+class QLearningStrategy: TicTacToeGameTheoryStrategy {
     let name = "Q-Learning"
     let description = "Reinforcement learning that learns optimal moves through experience and rewards"
     let historicalContext = "Reinforcement learning breakthrough by Watkins (1989)"
@@ -561,7 +561,7 @@ class QLearningStrategy: TicTacToeAIStrategy {
 
 // MARK: - Lookup Table / Perfect Play
 
-class LookupTableStrategy: TicTacToeAIStrategy {
+class LookupTableStrategy: TicTacToeGameTheoryStrategy {
     let name = "Lookup Table"
     let description = "Database of pre-computed optimal moves for every possible game state"
     let historicalContext = "Brute-force approach from early computing, guaranteed perfect play"
