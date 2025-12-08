@@ -232,7 +232,7 @@ class AlphaBetaStrategy: TicTacToeGameTheoryStrategy {
 class MCTSStrategy: TicTacToeGameTheoryStrategy {
     let name = "Monte Carlo Tree Search"
     let description = "Simulates random games from each position to evaluate moves statistically"
-    let historicalContext = "Modern approach popularized by AlphaGo (2016), revolutionized game AI"
+    let historicalContext = "Modern approach popularized by AlphaGo (2016), revolutionized game theory algorithms"
 
     private let iterations = 1000
 
@@ -314,7 +314,7 @@ enum OpponentStrategy: String, CaseIterable {
 class MCTSProbabilisticStrategy: TicTacToeGameTheoryStrategy {
     let name = "MCTS + Opponent Model"
     let description = "MCTS with Bayesian belief distribution over opponent strategies (random, greedy, defensive, optimal)"
-    let historicalContext = "Cutting-edge AI combining Monte Carlo methods with opponent modeling (2020s)"
+    let historicalContext = "Cutting-edge game theory algorithm combining Monte Carlo methods with opponent modeling (2020s)"
 
     private let iterations = 2000
 

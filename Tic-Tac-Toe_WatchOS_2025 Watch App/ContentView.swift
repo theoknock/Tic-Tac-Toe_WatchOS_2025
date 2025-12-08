@@ -435,7 +435,7 @@ struct AlgorithmPickerView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: .large) {
-                Text("AI Algorithm")
+                Text("Game Theory Algorithm")
                     .font(.title3)
                     .fontWeight(.bold)
                     .padding(.bottom, .small)
@@ -509,7 +509,7 @@ struct OpponentModelView: View {
                 .font(.headline)
                 .fontWeight(.bold)
 
-            Text("AI's belief distribution about your playing style")
+            Text("Game Theory Algorithm's belief distribution about your playing style")
                 .font(.caption2)
                 .foregroundColor(.secondary)
 
