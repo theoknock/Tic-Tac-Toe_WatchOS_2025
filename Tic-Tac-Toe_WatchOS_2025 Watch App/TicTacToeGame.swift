@@ -88,6 +88,7 @@ struct GameHistory: Identifiable {
     var cells: [GameCell] = []
     var currentPlayer: Player = .x
     var gameOver: Bool = false
+    var isPaused: Bool = false
     var winner: Player?
     var isDraw: Bool = false
     var winningPattern: [Int] = []

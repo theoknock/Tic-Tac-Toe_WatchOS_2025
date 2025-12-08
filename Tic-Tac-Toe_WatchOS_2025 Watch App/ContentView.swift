@@ -16,7 +16,7 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack {
-            if game.gameOver {
+            if game.gameOver || game.isPaused {
                 ButtonMenuView(game: game, celebrationScale: $celebrationScale)
                     .transition(.opacity)
             } else {
@@ -25,6 +25,7 @@ struct ContentView: View {
             }
         }
         .animation(.easeInOut(duration: 0.3), value: game.gameOver)
+        .animation(.easeInOut(duration: 0.3), value: game.isPaused)
     }
 }
 
@@ -66,6 +67,9 @@ struct BoardView: View {
             .background(game.currentTheme.boardBackground)
         }
         .padding(.vertical, .small)
+        .onLongPressGesture(minimumDuration: 0.5) {
+            game.isPaused = true
+        }
     }
 }
 
@@ -84,9 +88,17 @@ struct ButtonMenuView: View {
 
             Button("New Game") {
                 celebrationScale = 1.0
+                game.isPaused = false
                 game.resetGame()
             }
             .buttonStyle(.borderedProminent)
+
+            if !game.gameOver && game.isPaused {
+                Button("Resume Game") {
+                    game.isPaused = false
+                }
+                .buttonStyle(.bordered)
+            }
 
             Divider()
                 .padding(.vertical, .small)
