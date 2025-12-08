@@ -329,6 +329,15 @@ struct StatisticsView: View {
             }
             .padding()
         }
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button {
+                    game.shouldShowStatistics = false
+                } label: {
+                    Image(systemName: "chevron.left")
+                }
+            }
+        }
     }
 }
 
